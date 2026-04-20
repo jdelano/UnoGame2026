@@ -24,5 +24,100 @@ public class Game
     public List<Player> Players { get; set; }
     public DiscardPile DiscardPile { get; set; }
     public Deck Deck { get; set; }
-    
+
+    public Game()
+    {
+        Players = [];
+        DiscardPile = [];
+        Deck = [];
+    }
+
+    public void Run()
+    {
+        InitializeGame();
+        do
+        {
+            InitializeRound();
+            do
+            {
+                ProcessInput();
+                RenderOutput();
+            } while (!isRoundOver);
+            Console.WriteLine($"Congratulations! Player {currentPlayerIndex} Wins!");
+            Console.WriteLine("Press Q to quit or any other key to try another round...");
+            var keyInfo = Console.ReadKey();
+            if (keyInfo.Key == ConsoleKey.Q)
+            {
+                isGameOver = true;
+            }
+        } while (!isGameOver);
+    }
+
+    private void InitializeGame()
+    {
+        Console.Write("Enter the number of players: ");
+        numberOfPlayers = int.Parse(Console.ReadLine());
+        for (int i = 0; i < numberOfPlayers; i++)
+        {
+            Players.Add(new Player());
+        }
+        isGameOver = false;
+    }
+
+    private void InitializeRound()
+    {
+        currentPlayerIndex = 0;
+        isRoundOver = false;
+        Deck.Shuffle();
+        DealCards();
+        DealCardToDiscardPile();
+        gameDirection = Direction.Left;
+        RenderOutput();
+    }
+
+
+
+    private void ProcessInput()
+    {
+        bool validCard = false;
+        Card card;
+        do
+        {
+            Console.Write("Which card would you like to play (enter D to draw a card)? ");
+            string response = Console.ReadLine();
+            if (response.ToUpper() == "D")
+            {
+                card = Deck.DrawCard();
+                CurrentPlayer.ReceiveCard(card);
+                Console.WriteLine($"\n\nYou drew the {card} card.");
+            }
+            else
+            {
+                if (!int.TryParse(response, out int index) || index < 0 || index >= CurrentPlayer.CardsInHand)
+                {
+                    Console.WriteLine("Invalid selection. Please try again.");
+                    continue;
+                }
+                else
+                {
+                    card = CurrentPlayer.Hand[index];
+                    Console.WriteLine($"\n\nYou selected the {card} card");
+                }
+            }
+        } while (!validCard);
+    }
+
+    private void RenderOutput()
+    {
+    }
+
+    private void DealCards()
+    {
+    }
+    private void DealCardToDiscardPile()
+    {
+    }
+
+
+
 }

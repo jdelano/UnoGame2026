@@ -56,7 +56,7 @@ public class Card
 
     public Card(string number, CardColor color) : this(number, color, CardType.Face)
     {
-        
+
     }
 
     public bool Matches(Card other)
@@ -78,7 +78,14 @@ public class Card
 
     public override string ToString()
     {
-        return $"{EffectiveColor}-{Number}";
+        if (IsWildCard)
+        {
+            return $"{Number}";
+        }
+        else
+        {
+            return $"{EffectiveColor}-{Number}";
+        }
     }
 
     public void UpdateChosenColor()
