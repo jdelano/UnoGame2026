@@ -8,6 +8,7 @@ public enum Direction
 public class Game
 {
     private bool isRoundOver = false;
+    private const int NUMBER_OF_CARDS_IN_HAND = 7;
     private bool isGameOver = false;
     private int currentPlayerIndex = 0;
     private Direction gameDirection;
@@ -109,15 +110,79 @@ public class Game
 
     private void RenderOutput()
     {
+        Console.Clear();
+        DiscardPile.Display();
+        CurrentPlayer.Display();
+    }
+
+    private void DealCardToDiscardPile()
+    {
+        DiscardPile.Add(Deck.DrawCard());
     }
 
     private void DealCards()
     {
+        for (int i = 0; i < NUMBER_OF_CARDS_IN_HAND; i++)
+        {
+            foreach (var player in Players)
+            {
+                player.ReceiveCard(Deck.DrawCard());
+            }
+        }
     }
-    private void DealCardToDiscardPile()
+
+    public bool PlayCard(Player currentPlayer, Card card)
     {
+        if (DiscardPile.TopCard.Matches(card))
+        {
+            currentPlayer.RemoveCard(card);
+            DiscardPile.Add(card);
+            if (currentPlayer.CardsInHand == 0)
+            {
+                isRoundOver = true;
+            }
+            else
+            {
+                Action<Card> action = GetActionForCard(card);
+                action(card);
+            }
+            return true;
+        }
+        else
+        {
+            Console.WriteLine("\nThe card selected/drawn does not match the top card on the discard pile. It remains in your hand. Please try again.");
+            return false;
+        }
     }
 
+    private Action<Card> GetActionForCard(Card card)
+    {
+        // Face, Reverse, Skip, DrawTwo, DrawFour, Wild
 
+        switch (card.Type)
+        {
+            case CardType.Skip:
+                return c => SetNextPlayer(2);
+            case CardType.Reverse:
+                return c => 
+                { 
+                    ReverseDirection();
+                    SetNextPlayer(1);
+                };
+            case CardType.DrawTwo:
+
+        }
+    }
+
+    private void ReverseDirection()
+    {
+        gameDirection = (gameDirection == Direction.Left) ? Direction.Right : Direction.Left;
+    }
+
+    private void SetNextPlayer(int skipCount = 1)
+    {
+        int direction = (gameDirection == Direction.Left) ? -1 : 1;
+        currentPlayerIndex = (currentPlayerIndex + direction * skipCount + Players.Count) % Players.Count;
+    }
 
 }
